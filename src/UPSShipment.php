@@ -67,8 +67,11 @@ class UPSShipment extends UPSEntity {
    */
   public function setPackage(APIShipment $api_shipment) {
     $package = new UPSPackage();
+
+    $this->calculateWeight($package);
+//    $this->calculateDimensions($package);
     $this->setDimensions($package);
-    $this->setWeight($package);
+//    $this->setWeight($package);
     $api_shipment->addPackage($package);
   }
 
@@ -88,10 +91,55 @@ class UPSShipment extends UPSEntity {
   /**
    * @param \Ups\Entity\Package $ups_package
    */
+  public function calculateDimensions(UPSPackage $ups_package) {
+    $dimensions = new Dimensions();
+
+  }
+
+  /**
+   * @param \Ups\Entity\Package $ups_package
+   */
   public function setWeight(UPSPackage $ups_package) {
     $ups_package_weight = $ups_package->getPackageWeight();
     $ups_package_weight->setWeight($this->shipment->getPackageType()->getWeight()->getNumber());
     $unit = $this->getUnitOfMeasure($this->shipment->getPackageType()->getWeight()->getUnit());
     $ups_package_weight->setUnitOfMeasurement($this->setUnitOfMeasurement($unit));
   }
+
+  /**
+   * @param \Ups\Entity\Package $ups_package
+   */
+  public function calculateWeight(UPSPackage $ups_package) {
+    $orderItems = $this->shipment->getOrder()->getItems();
+    $itemWeight = [];
+    $itemUnit = '';
+    foreach ($orderItems as $item) {
+      /** @var \Drupal\physical\Plugin\Field\FieldType\MeasurementItem $weight */
+      $weight = $item->getPurchasedEntity()->get('weight')->first();
+      $quantity = $item->getQuantity();
+      $weightMeasure = $weight->toMeasurement()->multiply($quantity);
+      $orderItemWeight = $weightMeasure->getNumber();
+      array_push($itemWeight, $orderItemWeight);
+      $itemUnit = $item->getPurchasedEntity()->get('weight')->unit;
+    }
+    $ups_package_weight = $ups_package->getPackageWeight();
+    $ups_package_weight->setWeight(array_sum($itemWeight));
+
+    /*
+     * @todo physical also supports g & oz which should be accounted for here.
+     */
+    switch ($itemUnit) {
+      case 'lb':
+        $itemUnit = 'LBS';
+        break;
+      case 'kg':
+        $itemUnit = 'KGS';
+        break;
+      default:
+        $itemUnit = 'LBS';
+        break;
+    }
+    $ups_package_weight->setUnitOfMeasurement($this->setUnitOfMeasurement($itemUnit));
+  }
+
 }
