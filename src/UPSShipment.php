@@ -69,8 +69,11 @@ class UPSShipment extends UPSEntity {
     $package = new UPSPackage();
 
     $this->calculateWeight($package);
-//    $this->calculateDimensions($package);
-    $this->setDimensions($package);
+    $this->calculateDimensions($package);
+    /*
+     * @todo create setting to switch between these functions.
+     */
+//    $this->setDimensions($package);
 //    $this->setWeight($package);
     $api_shipment->addPackage($package);
   }
@@ -93,7 +96,23 @@ class UPSShipment extends UPSEntity {
    */
   public function calculateDimensions(UPSPackage $ups_package) {
     $dimensions = new Dimensions();
-
+    $orderItems = $this->shipment->getOrder()->getItems();
+    $itemLength = [];
+    $itemHeight = [];
+    $itemWidth = [];
+    foreach ($orderItems as $item) {
+      $item_dimensions = $item->getPurchasedEntity()->get('dimensions')->getValue();
+      array_push($itemLength, $item_dimensions[0]['length']);
+      array_push($itemHeight, $item_dimensions[0]['height']);
+      array_push($itemWidth, $item_dimensions[0]['width']);
+    }
+    // Find the max dimensions for each measurements and use those.
+    $dimensions->setHeight(intval(max($itemHeight)));
+    $dimensions->setWidth(intval(max($itemWidth)));
+    $dimensions->setLength(intval(max($itemLength)));
+    $unit = $this->getUnitOfMeasure($this->shipment->getPackageType()->getLength()->getUnit());
+    $dimensions->setUnitOfMeasurement($this->setUnitOfMeasurement($unit));
+    $ups_package->setDimensions($dimensions);
   }
 
   /**
