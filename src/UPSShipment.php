@@ -68,13 +68,13 @@ class UPSShipment extends UPSEntity {
   public function setPackage(APIShipment $api_shipment) {
     $package = new UPSPackage();
 
-    $this->calculateWeight($package);
-    $this->calculateDimensions($package);
+//    $this->calculateWeight($package);
+//    $this->calculateDimensions($package);
     /*
      * @todo create setting to switch between these functions.
      */
-//    $this->setDimensions($package);
-//    $this->setWeight($package);
+    $this->setDimensions($package);
+    $this->setWeight($package);
     $api_shipment->addPackage($package);
   }
 
