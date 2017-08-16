@@ -206,19 +206,7 @@ class CommerceUps extends ShippingMethodBase {
     $this->ups_rate_service->setShipment($shipment);
     return $this->ups_rate_service->getRates();
   }
-
-  /**
-   * Selects the given shipping rate for the given shipment.
-   *
-   * @param \Drupal\commerce_shipping\Entity\ShipmentInterface $shipment
-   *   The shipment.
-   * @param \Drupal\commerce_shipping\ShippingRate $rate
-   *   The shipping rate.
-   */
-  public function selectRate(ShipmentInterface $shipment, ShippingRate $rate) {
-
-  }
-
+  
   /**
    * Determine if we have the minimum information to connect to UPS.
    *
