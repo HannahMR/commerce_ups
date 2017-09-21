@@ -2,6 +2,7 @@
 
 namespace Drupal\commerce_ups;
 
+use CommerceGuys\Addressing\AddressInterface;
 use Drupal\commerce_shipping\Entity\ShipmentInterface;
 use Ups\Entity\Package as UPSPackage;
 use Ups\Entity\Address;
@@ -30,17 +31,21 @@ class UPSShipment extends UPSEntity {
   }
 
   /**
-   * @param $api_shipment APIShipment.
+   * Sets the ship to for a given shipment.
+   *
+   * @param \Ups\Entity\Shipment $api_shipment
+   *   A Ups API shipment object.
    */
   public function setShipTo(APIShipment $api_shipment) {
-    // todo: set all address fields
-    $address = $this->shipment->getShippingProfile()->address;
+    /** @var AddressInterface $address */
+    $address = $this->shipment->getShippingProfile()->get('address')->first();
     $to_address = new Address();
-    $to_address->setAddressLine1($address->address_line1);
-    $to_address->setAddressLine2($address->address_line2);
-    $to_address->setCity($address->locality);
-    $to_address->setStateProvinceCode($address->administrative_area);
-    $to_address->setPostalCode($address->postal_code);
+    $to_address->setAddressLine1($address->getAddressLine1());
+    $to_address->setAddressLine2($address->getAddressLine2());
+    $to_address->setCity($address->getLocality());
+    $to_address->setCountryCode($address->getCountryCode());
+    $to_address->setStateProvinceCode($address->getAdministrativeArea());
+    $to_address->setPostalCode($address->getPostalCode());
     $api_shipment->getShipTo()->setAddress($to_address);
   }
 
