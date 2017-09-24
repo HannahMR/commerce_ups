@@ -38,6 +38,16 @@ class UPS extends ShippingMethodBase {
   protected $ups_rate_service;
 
   /**
+   * Package All items in one box, ignoring item dimensions.
+   */
+  const PACKAGE_ALL_IN_ONE = 'allinone';
+
+  /**
+   * Calculate box by adding item dimensions.
+   */
+  const PACKAGE_CALCULATE = 'calculate';
+
+  /**
    * Constructs a new ShippingMethodBase object.
    *
    * @param array $configuration
@@ -85,6 +95,7 @@ class UPS extends ShippingMethodBase {
         'rate_type' => 0,
       ] ,
       'options' => [
+        'packaging' => static::PACKAGE_ALL_IN_ONE,
         'log' => [],
       ],
     ] + parent::defaultConfiguration();
@@ -157,6 +168,16 @@ class UPS extends ShippingMethodBase {
       '#title' => $this->t('UPS Options'),
       '#description' => $this->t('Additional options for UPS'),
     ];
+    $form['options']['packaging'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Packaging strategy'),
+      '#description' => $this->t('Select your packaging strategy. "All items in one box" will ignore package type and product dimensions, and assume all items go in one box. "Calculate" Will add item dimensions to calculate a box size and weight.'),
+      '#options' => [
+        static::PACKAGE_ALL_IN_ONE => $this->t("All items in one box"),
+        static::PACKAGE_CALCULATE => $this->t("Calculate, add item dimensions."),
+      ],
+      '#default_value' => $this->configuration['options']['packaging'],
+    ];
     $form['options']['log'] = [
       '#type' => 'checkboxes',
       '#title' => $this->t('Log the following messages for debugging'),
@@ -182,6 +203,7 @@ class UPS extends ShippingMethodBase {
       $this->configuration['api_information']['password'] = $values['api_information']['password'];
       $this->configuration['api_information']['mode'] = $values['api_information']['mode'];
       $this->configuration['rate_options']['rate_type'] = $values['rate_options']['rate_type'];
+      $this->configuration['options']['packaging'] = $values['options']['packaging'];
       $this->configuration['options']['log'] = $values['options']['log'];
 
     }

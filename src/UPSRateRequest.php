@@ -58,7 +58,8 @@ class UPSRateRequest extends UPSRequest {
 
     try {
       $ups_shipment = new UPSShipment($this->commerce_shipment);
-      $shipment = $ups_shipment->getShipment();
+      $packing_config = $this->configuration['options']['packaging'];
+      $shipment = $ups_shipment->getShipment($packing_config);
 
       // Enable negotiated rates, if enabled.
       if ($this->getRateType()) {
