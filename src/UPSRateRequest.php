@@ -15,6 +15,7 @@ use Ups\Entity\RateInformation;
  * @package Drupal\commerce_ups
  */
 class UPSRateRequest extends UPSRequest {
+
   /**
    * @var \Drupal\commerce_shipping\Entity\ShipmentInterface*/
   protected $commerce_shipment;
@@ -90,7 +91,6 @@ class UPSRateRequest extends UPSRequest {
         $currency = $ups_rate->TotalCharges->CurrencyCode;
         $price = new Price((string) $cost, $currency);
         $service_name = $ups_rate->Service->getName();
-
         $shipping_service = new ShippingService(
           $service_name,
           $service_name

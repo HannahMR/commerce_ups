@@ -41,18 +41,13 @@ abstract class UPSEntity {
     switch ($unit) {
       case 'lb':
         return UnitOfMeasurement::PROD_POUNDS;
-
       case 'kg':
         return UnitOfMeasurement::PROD_KILOGRAMS;
-
       case 'in':
         return UnitOfMeasurement::UOM_IN;
-
       case 'cm':
         return UnitOfMeasurement::UOM_CM;
-
     }
     return $unit;
   }
-
 }

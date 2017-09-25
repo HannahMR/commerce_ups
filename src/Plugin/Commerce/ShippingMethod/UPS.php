@@ -85,20 +85,20 @@ class UPS extends ShippingMethodBase {
    */
   public function defaultConfiguration() {
     return [
-      'api_information' => [
-        'access_key' => '',
-        'user_id' => '',
-        'password' => '',
-        'mode' => 'test',
-      ],
-      'rate_options' => [
-        'rate_type' => 0,
-      ] ,
-      'options' => [
-        'packaging' => static::PACKAGE_ALL_IN_ONE,
-        'log' => [],
-      ],
-    ] + parent::defaultConfiguration();
+        'api_information' => [
+          'access_key' => '',
+          'user_id' => '',
+          'password' => '',
+          'mode' => 'test',
+        ],
+        'rate_options' => [
+          'rate_type' => 0,
+        ] ,
+        'options' => [
+          'packaging' => static::PACKAGE_ALL_IN_ONE,
+          'log' => [],
+        ],
+      ] + parent::defaultConfiguration();
   }
 
   /**
@@ -223,7 +223,19 @@ class UPS extends ShippingMethodBase {
     $this->ups_rate_service->setShipment($shipment);
     return $this->ups_rate_service->getRates();
   }
-  
+
+  /**
+   * Selects the given shipping rate for the given shipment.
+   *
+   * @param \Drupal\commerce_shipping\Entity\ShipmentInterface $shipment
+   *   The shipment.
+   * @param \Drupal\commerce_shipping\ShippingRate $rate
+   *   The shipping rate.
+   */
+  public function selectRate(ShipmentInterface $shipment, ShippingRate $rate) {
+
+  }
+
   /**
    * Determine if we have the minimum information to connect to UPS.
    *
