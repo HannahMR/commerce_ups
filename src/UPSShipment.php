@@ -47,14 +47,15 @@ class UPSShipment extends UPSEntity {
   *   A Ups API shipment object.
   */
   public function setShipTo(APIShipment $api_shipment) {
-    // todo: set all address fields.
-    $address = $this->shipment->getShippingProfile()->address;
+    /** @var AddressInterface $address */
+    $address = $this->shipment->getShippingProfile()->get('address')->first();
     $to_address = new Address();
-    $to_address->setAddressLine1($address->address_line1);
-    $to_address->setAddressLine2($address->address_line2);
-    $to_address->setCity($address->locality);
-    $to_address->setStateProvinceCode($address->administrative_area);
-    $to_address->setPostalCode($address->postal_code);
+    $to_address->setAddressLine1($address->getAddressLine1());
+    $to_address->setAddressLine2($address->getAddressLine2());
+    $to_address->setCity($address->getLocality());
+    $to_address->setCountryCode($address->getCountryCode());
+    $to_address->setStateProvinceCode($address->getAdministrativeArea());
+    $to_address->setPostalCode($address->getPostalCode());
     $api_shipment->getShipTo()->setAddress($to_address);
   }
 
@@ -129,6 +130,7 @@ class UPSShipment extends UPSEntity {
     $itemLength = [];
     $itemHeight = [];
     $itemWidth = [];
+    $item_dimensions = [];
 
     foreach ($orderItems as $item) {
       $item_dimensions = $item->getPurchasedEntity()->get('dimensions')->getValue();
@@ -141,7 +143,8 @@ class UPSShipment extends UPSEntity {
     $dimensions->setHeight(intval(max($itemHeight)));
     $dimensions->setWidth(intval(max($itemWidth)));
     $dimensions->setLength(intval(max($itemLength)));
-    $unit = $this->getUnitOfMeasure($this->shipment->getPackageType()->getLength()->getUnit());
+    $item_unit = $item_dimensions[0]['unit'];
+    $unit = $this->getUnitOfMeasure($item_unit);
     $dimensions->setUnitOfMeasurement($this->setUnitOfMeasurement($unit));
     $ups_package->setDimensions($dimensions);
   }
