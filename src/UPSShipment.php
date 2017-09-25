@@ -80,7 +80,6 @@ class UPSShipment extends UPSEntity {
         $this->calculateWeight($package);
         $this->calculateDimensions($package);
         break;
-
       case 'allinone':
         $this->setDimensions($package);
         $this->setWeight($package);
