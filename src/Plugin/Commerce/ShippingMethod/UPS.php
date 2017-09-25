@@ -8,9 +8,7 @@ use Drupal\commerce_shipping\Plugin\Commerce\ShippingMethod\ShippingMethodBase;
 use Drupal\commerce_shipping\ShippingRate;
 use Drupal\commerce_ups\UPSRequestInterface;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\commerce_ups\UPSRateRequest;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-
 
 /**
  * @CommerceShippingMethod(
@@ -33,11 +31,21 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   },
  * )
  */
-class CommerceUps extends ShippingMethodBase {
+class UPS extends ShippingMethodBase {
   /**
    * @var \Drupal\commerce_ups\UPSRateRequest
    */
   protected $ups_rate_service;
+
+  /**
+   * Package All items in one box, ignoring item dimensions.
+   */
+  const PACKAGE_ALL_IN_ONE = 'allinone';
+
+  /**
+   * Calculate box by adding item dimensions.
+   */
+  const PACKAGE_CALCULATE = 'calculate';
 
   /**
    * Constructs a new ShippingMethodBase object.
@@ -49,7 +57,7 @@ class CommerceUps extends ShippingMethodBase {
    * @param mixed $plugin_definition
    *   The plugin implementation definition.
    * @param \Drupal\commerce_shipping\PackageTypeManagerInterface $packageTypeManager
-   *  The package type manager.
+   *   The package type manager.
    * @param \Drupal\commerce_ups\UPSRequestInterface $ups_rate_request
    *   The rate request service.
    */
@@ -87,6 +95,7 @@ class CommerceUps extends ShippingMethodBase {
         'rate_type' => 0,
       ] ,
       'options' => [
+        'packaging' => static::PACKAGE_ALL_IN_ONE,
         'log' => [],
       ],
     ] + parent::defaultConfiguration();
@@ -109,14 +118,12 @@ class CommerceUps extends ShippingMethodBase {
     $form['api_information']['access_key'] = [
       '#type' => 'textfield',
       '#title' => t('Access Key'),
-      '#description' => t(''),
       '#default_value' => $this->configuration['api_information']['access_key'],
       '#required' => TRUE,
     ];
     $form['api_information']['user_id'] = [
       '#type' => 'textfield',
       '#title' => t('User ID'),
-      '#description' => t(''),
       '#default_value' => $this->configuration['api_information']['user_id'],
       '#required' => TRUE,
     ];
@@ -124,7 +131,6 @@ class CommerceUps extends ShippingMethodBase {
     $form['api_information']['password'] = [
       '#type' => 'textfield',
       '#title' => t('Password'),
-      '#description' => t(''),
       '#default_value' => $this->configuration['api_information']['password'],
       '#required' => TRUE,
     ];
@@ -162,6 +168,16 @@ class CommerceUps extends ShippingMethodBase {
       '#title' => $this->t('UPS Options'),
       '#description' => $this->t('Additional options for UPS'),
     ];
+    $form['options']['packaging'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Packaging strategy'),
+      '#description' => $this->t('Select your packaging strategy. "All items in one box" will ignore package type and product dimensions, and assume all items go in one box. "Calculate" Will add item dimensions to calculate a box size and weight.'),
+      '#options' => [
+        static::PACKAGE_ALL_IN_ONE => $this->t("All items in one box"),
+        static::PACKAGE_CALCULATE => $this->t("Calculate, add item dimensions."),
+      ],
+      '#default_value' => $this->configuration['options']['packaging'],
+    ];
     $form['options']['log'] = [
       '#type' => 'checkboxes',
       '#title' => $this->t('Log the following messages for debugging'),
@@ -187,6 +203,7 @@ class CommerceUps extends ShippingMethodBase {
       $this->configuration['api_information']['password'] = $values['api_information']['password'];
       $this->configuration['api_information']['mode'] = $values['api_information']['mode'];
       $this->configuration['rate_options']['rate_type'] = $values['rate_options']['rate_type'];
+      $this->configuration['options']['packaging'] = $values['options']['packaging'];
       $this->configuration['options']['log'] = $values['options']['log'];
 
     }
@@ -202,7 +219,7 @@ class CommerceUps extends ShippingMethodBase {
    * @return \Drupal\commerce_shipping\ShippingRate[]
    *   The rates.
    */
-  public function calculateRates(ShipmentInterface $shipment){
+  public function calculateRates(ShipmentInterface $shipment) {
     $this->ups_rate_service->setShipment($shipment);
     return $this->ups_rate_service->getRates();
   }
@@ -222,5 +239,5 @@ class CommerceUps extends ShippingMethodBase {
       && !empty($api_information['password'])
     );
   }
-}
 
+}
