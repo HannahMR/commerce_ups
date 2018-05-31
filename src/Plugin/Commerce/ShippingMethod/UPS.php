@@ -225,18 +225,6 @@ class UPS extends ShippingMethodBase {
   }
 
   /**
-   * Selects the given shipping rate for the given shipment.
-   *
-   * @param \Drupal\commerce_shipping\Entity\ShipmentInterface $shipment
-   *   The shipment.
-   * @param \Drupal\commerce_shipping\ShippingRate $rate
-   *   The shipping rate.
-   */
-  public function selectRate(ShipmentInterface $shipment, ShippingRate $rate) {
-
-  }
-
-  /**
    * Determine if we have the minimum information to connect to UPS.
    *
    * @return bool
