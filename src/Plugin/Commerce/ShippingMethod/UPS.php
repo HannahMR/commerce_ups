@@ -5,12 +5,13 @@ namespace Drupal\commerce_ups\Plugin\Commerce\ShippingMethod;
 use Drupal\commerce_shipping\Entity\ShipmentInterface;
 use Drupal\commerce_shipping\PackageTypeManagerInterface;
 use Drupal\commerce_shipping\Plugin\Commerce\ShippingMethod\ShippingMethodBase;
-use Drupal\commerce_shipping\ShippingRate;
 use Drupal\commerce_ups\UPSRequestInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
+ * Defines the UPS shipping method.
+ *
  * @CommerceShippingMethod(
  *  id = "ups",
  *  label = @Translation("UPS"),
@@ -32,10 +33,13 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * )
  */
 class UPS extends ShippingMethodBase {
+
   /**
+   * The UPS rate service.
+   *
    * @var \Drupal\commerce_ups\UPSRateRequest
    */
-  protected $ups_rate_service;
+  protected $upsRateService;
 
   /**
    * Package All items in one box, ignoring item dimensions.
@@ -63,8 +67,8 @@ class UPS extends ShippingMethodBase {
    */
   public function __construct(array $configuration, $plugin_id, $plugin_definition, PackageTypeManagerInterface $packageTypeManager, UPSRequestInterface $ups_rate_request) {
     parent::__construct($configuration, $plugin_id, $plugin_definition, $packageTypeManager);
-    $this->ups_rate_service = $ups_rate_request;
-    $this->ups_rate_service->setConfig($configuration);
+    $this->upsRateService = $ups_rate_request;
+    $this->upsRateService->setConfig($configuration);
   }
 
   /**
@@ -85,20 +89,20 @@ class UPS extends ShippingMethodBase {
    */
   public function defaultConfiguration() {
     return [
-        'api_information' => [
-          'access_key' => '',
-          'user_id' => '',
-          'password' => '',
-          'mode' => 'test',
-        ],
-        'rate_options' => [
-          'rate_type' => 0,
-        ] ,
-        'options' => [
-          'packaging' => static::PACKAGE_ALL_IN_ONE,
-          'log' => [],
-        ],
-      ] + parent::defaultConfiguration();
+      'api_information' => [
+        'access_key' => '',
+        'user_id' => '',
+        'password' => '',
+        'mode' => 'test',
+      ],
+      'rate_options' => [
+        'rate_type' => 0,
+      ] ,
+      'options' => [
+        'packaging' => static::PACKAGE_ALL_IN_ONE,
+        'log' => [],
+      ],
+    ] + parent::defaultConfiguration();
   }
 
   /**
@@ -220,20 +224,8 @@ class UPS extends ShippingMethodBase {
    *   The rates.
    */
   public function calculateRates(ShipmentInterface $shipment) {
-    $this->ups_rate_service->setShipment($shipment);
-    return $this->ups_rate_service->getRates();
-  }
-
-  /**
-   * Selects the given shipping rate for the given shipment.
-   *
-   * @param \Drupal\commerce_shipping\Entity\ShipmentInterface $shipment
-   *   The shipment.
-   * @param \Drupal\commerce_shipping\ShippingRate $rate
-   *   The shipping rate.
-   */
-  public function selectRate(ShipmentInterface $shipment, ShippingRate $rate) {
-
+    $this->upsRateService->setShipment($shipment);
+    return $this->upsRateService->getRates();
   }
 
   /**
